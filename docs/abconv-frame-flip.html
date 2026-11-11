@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>abconv Frame Flip</title>
+<meta name="description" content="Which signs in abconv are flipped, why its beams come out right and its interaction point mirrored, and the root fix.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<script src="figure-data.js"></script>
+<script src="charts.js"></script>
+</head>
+<body>
+<main>
+
+<h1>abconv crossing frame: what is flipped and the root fix</h1>
+<p class="lead">abconv (eic/afterburner v0.2.1 and main) gives the beams the right −25 mrad crossing, but builds the
+interaction point (IP) for a +25 mrad crossing. Two sign conventions cancel in the momenta; the vertex code
+passes through neither of them. The root fix removes both conventions and sets the presets to the ePIC angles.</p>
+<p class="meta">Finding F2 of afterburner-workbench (dis-autoresearch F9). Numbers: 10x100 high divergence, NC DIS
+10 &lt; Q² &lt; 100 GeV², <span id="n-events"></span> events, written by <code>docs/make_figure_data.py</code>.</p>
+
+<div class="tiles" id="tiles"></div>
+
+<h2>Coordinates and symbols</h2>
+<p>ePIC frame: the electron beam runs along −z, the proton beam leaves at θ = −25 mrad, toward −x, and +0.10 mrad
+vertically. The beam directions in abconv's configuration are</p>
+\[
+\hat d_e = (0,\,0,\,-1), \qquad
+\hat d_p = R_x(\theta_v)\,R_y(\theta_h)\,\hat z = (\sin\theta_h,\; -\cos\theta_h \sin\theta_v,\; \cos\theta_h\cos\theta_v),
+\]
+<p>with the preset values θ<sub>h</sub> = <code>crossing_angle_hor</code> and θ<sub>v</sub> =
+<code>crossing_angle_ver</code>. Every IP6 preset sets θ<sub>h</sub> = +25e-3 and θ<sub>v</sub> = +100e-6, so the
+configured proton points to +25 mrad horizontally and −0.10 mrad vertically (<code>rotateX(+θ)</code> tilts +z
+toward −y).</p>
+<p>Each collision comes from a proton at position <em>p</em> in its bunch and an electron at position <em>e</em> in
+its bunch. Both abconv and eicBeamShape set</p>
+\[
+ct = \frac{e - p}{2}, \qquad z = \frac{e + p}{2}
+\quad\Longrightarrow\quad e = z + ct, \quad p = z - ct .
+\]
+<p>Λ(<b>u</b>) is the Lorentz transformation that gives a particle at rest the velocity <b>u</b>; CLHEP's
+<code>HepBoost(u)</code> is Λ(<b>u</b>).</p>
+
+<h2>The flip in one picture</h2>
+<div class="panels">
+  <figure>
+    <p class="fig-title">abconv v0.2.1</p>
+    <svg viewBox="0 84 360 178" role="img" aria-label="abconv v0.2.1: the preset points the proton to +25 mrad, the output proton leaves at −25 mrad, and the vertex code tilts the bunches by +θ/2 while the beams' bisector lies at −θ/2.">
+      <defs>
+        <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        <marker id="a1m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+      </defs>
+      <ellipse cx="150" cy="140" rx="118" ry="8" class="f-ab" transform="rotate(-11 150 140)"/>
+      <line x1="150" y1="140" x2="292" y2="167.6" class="d-dot"/>
+      <line x1="150" y1="140" x2="247.4" y2="100.7" class="d-thin" stroke-dasharray="5 4" marker-end="url(#a1m)"/>
+      <line x1="150" y1="140" x2="247.4" y2="179.3" class="d-ink" stroke-width="2" marker-end="url(#a1)"/>
+      <line x1="150" y1="140" x2="45" y2="140" class="d-ink" stroke-width="2" marker-end="url(#a1)"/>
+      <path d="M218.7,126.6 A70,70 0 0 1 218.7,153.4" class="d-ab" stroke-width="1.5"/>
+      <text x="252" y="97" class="d-small">preset +25 mrad</text>
+      <text x="252" y="190" class="d-text">proton −25 mrad</text>
+      <text x="50" y="131" class="d-text">electron, −z</text>
+      <text x="226" y="145" class="d-small t-ab">θ apart</text>
+      <text x="14" y="226" class="d-small t-ab">bunch tilt in the vertex code: +θ/2</text>
+      <text x="14" y="244" class="d-small">dotted: bisector of the output beams, −θ/2</text>
+      <circle cx="150" cy="140" r="3" fill="currentColor"/>
+      <g transform="translate(300 252)"><line x1="0" y1="0" x2="26" y2="0" class="d-thin" marker-end="url(#a1m)"/><line x1="0" y1="0" x2="0" y2="-26" class="d-thin" marker-end="url(#a1m)"/><text x="30" y="4" class="d-small">z</text><text x="-4" y="-30" class="d-small">x</text></g>
+    </svg>
+    <figcaption>Momenta and vertex disagree: the beams leave as for −25 mrad, the bunches the vertex code places are
+    tilted as for +25 mrad. IP x = +(θ/2)(z + ct).</figcaption>
+  </figure>
+  <figure>
+    <p class="fig-title">Root fix (and Pythia8 + eicBeamShape)</p>
+    <svg viewBox="0 84 360 178" role="img" aria-label="Root fix: the preset is −25 mrad, the output proton leaves at −25 mrad, and the bunches lie on the beams' bisector at −θ/2.">
+      <defs>
+        <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+        <marker id="a2m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+      </defs>
+      <ellipse cx="150" cy="140" rx="118" ry="8" class="f-fix" transform="rotate(11 150 140)"/>
+      <line x1="150" y1="140" x2="292" y2="167.6" class="d-dot"/>
+      <line x1="150" y1="140" x2="247.4" y2="179.3" class="d-ink" stroke-width="2" marker-end="url(#a2)"/>
+      <line x1="150" y1="140" x2="45" y2="140" class="d-ink" stroke-width="2" marker-end="url(#a2)"/>
+      <text x="252" y="185" class="d-small">preset −25 mrad</text>
+      <text x="252" y="200" class="d-text">= proton out</text>
+      <text x="50" y="160" class="d-text">electron, −z</text>
+      <text x="14" y="226" class="d-small t-fix">bunch tilt in the vertex code: −θ/2</text>
+      <text x="14" y="244" class="d-small">on the bisector of the output beams</text>
+      <circle cx="150" cy="140" r="3" fill="currentColor"/>
+      <g transform="translate(300 252)"><line x1="0" y1="0" x2="26" y2="0" class="d-thin" marker-end="url(#a2m)"/><line x1="0" y1="0" x2="0" y2="-26" class="d-thin" marker-end="url(#a2m)"/><text x="30" y="4" class="d-small">z</text><text x="-4" y="-30" class="d-small">x</text></g>
+    </svg>
+    <figcaption>Preset, momenta and vertex in one frame: IP x = −(θ/2)(z + ct) with θ = 25 mrad, as in
+    eicBeamShape run at −0.025.</figcaption>
+  </figure>
+</div>
+<p class="meta">Top view, x up, z to the right. Angles drawn about 15× larger than 25 mrad.</p>
+
+<h2>What abconv does, step by step</h2>
+<p>abconv takes a head-on event (proton along +z, electron along −z) and applies, per event
+(<code>Converter.cc</code>, <code>Afterburner.cc</code> <code>process_event</code>):</p>
+
+<h3>1. Boost</h3>
+<p>The boost vector is half the sum of the two beam directions (<code>Afterburner.cc</code> lines 323–328):</p>
+\[
+\vec\beta = \tfrac12(\hat d_p + \hat d_e) \approx \Big(\tfrac{\theta_h}{2},\; -\tfrac{\theta_v}{2},\; -\tfrac{\theta_h^2}{4}\Big).
+\]
+<p>It is applied as <code>evt.boost(β)</code> (<code>Converter.cc</code> line 84). HepMC3's
+<code>GenEvent::boost(v)</code> transforms to a frame moving with <b>v</b>, so it acts on the particles as
+Λ(−<b>v</b>). PR #38 states this convention in its vertex loop. With θ<sub>h</sub> = +25 mrad, the momenta receive a
+transverse kick of −θ<sub>h</sub>/2 = −12.5 mrad: toward −x.</p>
+
+<h3>2. Rotation</h3>
+<p>The rotation is meant to take the boosted beam axis to the beams' difference direction (lines 379–382):</p>
+\[
+\hat n = (\hat d_p - \hat d_e)\times\hat z \;\propto\; (-\theta_v,\, -\theta_h,\, 0),\qquad
+\alpha = +\arccos\frac{(\hat d_p - \hat d_e)\cdot\hat z}{|\hat d_p - \hat d_e|} = +\frac{\theta_h}{2}.
+\]
+<p>For θ<sub>h</sub> &gt; 0 the axis points along −ŷ, so the rotation by +θ/2 about it is R<sub>y</sub>(−θ<sub>h</sub>/2): it
+turns +z further toward −x. The line carries the comment <code>// TODO back to -acos?</code>.</p>
+
+<figure>
+  <p class="fig-title">The momenta in abconv: boost, then rotation</p>
+  <svg viewBox="0 0 700 200" role="img" aria-label="Three stages: head-on beams; after the boost the proton points 12.5 mrad toward minus x and the electron too; after the rotation the proton is at minus 25 mrad and the electron along minus z.">
+    <defs>
+      <marker id="a3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="currentColor"/></marker>
+      <marker id="a3m" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--muted)"/></marker>
+    </defs>
+    <text x="110" y="28" text-anchor="middle" class="d-text" font-weight="600">head-on input</text>
+    <text x="350" y="28" text-anchor="middle" class="d-text" font-weight="600">after the boost</text>
+    <text x="590" y="28" text-anchor="middle" class="d-text" font-weight="600">after the rotation</text>
+    <line x1="30" y1="95" x2="190" y2="95" class="d-dot"/><line x1="270" y1="95" x2="430" y2="95" class="d-dot"/><line x1="510" y1="95" x2="670" y2="95" class="d-dot"/>
+    <line x1="110" y1="95" x2="190" y2="95" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <line x1="110" y1="95" x2="30" y2="95" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <line x1="350" y1="95" x2="428.5" y2="110.3" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <line x1="350" y1="95" x2="271.5" y2="110.3" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <line x1="590" y1="95" x2="664.2" y2="125" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <line x1="590" y1="95" x2="510" y2="95" class="d-ink" stroke-width="2" marker-end="url(#a3)"/>
+    <text x="194" y="88" class="d-small">p</text><text x="24" y="88" class="d-small" text-anchor="end">e</text>
+    <text x="432" y="122" class="d-small">p: −θ/2</text><text x="268" y="124" class="d-small" text-anchor="end">e: −θ/2</text>
+    <text x="668" y="138" class="d-small" text-anchor="end">p: −θ</text><text x="506" y="88" class="d-small" text-anchor="end">e: −z</text>
+    <line x1="205" y1="60" x2="250" y2="60" class="d-thin" marker-end="url(#a3m)"/>
+    <line x1="445" y1="60" x2="490" y2="60" class="d-thin" marker-end="url(#a3m)"/>
+    <text x="228" y="160" text-anchor="middle" class="d-small">boost: x kick −θ/2 to both</text>
+    <text x="468" y="160" text-anchor="middle" class="d-small">rotation by −θ/2 about y</text>
+    <text x="350" y="186" text-anchor="middle" class="d-small">θ = 25 mrad. abconv v0.2.1 and the root fix apply the same two steps; they differ in how the signs are reached.</text>
+  </svg>
+  <figcaption>Both codes move the beams the same way. abconv gets there from a +25 mrad preset through two flipped
+  signs (the boost convention and the +acos); the root fix gets there from a −25 mrad preset with no flip.</figcaption>
+</figure>
+
+<h3>3. The two flips cancel in the momenta</h3>
+<p>The momentum transformation of v0.2.1 equals the one the ePIC geometry needs, except for the sign of the
+longitudinal boost component:</p>
+\[
+\underbrace{R_y\!\big(-\tfrac{\theta_h}{2}\big)\,\Lambda\!\big(-\vec\beta(\theta_h)\big)}_{\text{abconv, }\theta_h = +25\text{ mrad}}
+\quad\text{vs.}\quad
+\underbrace{R_y\!\big(\tfrac{\theta}{2}\big)\,\Lambda\!\big(\vec\beta(\theta)\big)}_{\text{ePIC, }\theta = -25\text{ mrad}},
+\qquad
+-\vec\beta(\theta_h) = \Big(\tfrac{\theta}{2},\, -\tfrac{\theta_v'}{2},\, +\tfrac{\theta^2}{4}\Big),\;
+\vec\beta(\theta) = \Big(\tfrac{\theta}{2},\, -\tfrac{\theta_v'}{2},\, -\tfrac{\theta^2}{4}\Big),
+\]
+<p>where θ = −θ<sub>h</sub> and θ<sub>v</sub>′ = −θ<sub>v</sub>. Directions, divergences and crab kicks therefore come out
+right; the beams leave at −25 mrad and +0.10 mrad, the configured geometry turned by 180° about z. Only β<sub>z</sub>
+shows the flip, in the beam energies:</p>
+\[
+\text{abconv: } \frac{\Delta E_p}{E_p} = +\frac{3\theta^2}{8} = +2.34\times10^{-4},\;\;
+\frac{\Delta E_e}{E_e} = -\frac{\theta^2}{8} = -0.78\times10^{-4};
+\qquad \text{root fix: the two values swap.}
+\]
+<p>Either way the shifts add up to θ²/4, since s is invariant.</p>
+
+<h3>4. The vertex passes through neither flip</h3>
+<p><code>generate_vertx_with_bunch_interaction()</code> (lines 54–113) is line for line eicBeamShape's. It places the
+collision in the bisector frame and rotates it by +θ<sub>h</sub>/2 about y:</p>
+\[
+x' = \sin\tfrac{\theta_h}{2}\; ct,\quad z' = \tfrac{e+p}{2}
+\quad\xrightarrow{\;R_y(+\theta_h/2)\;}\quad
+x = x'\cos\tfrac{\theta_h}{2} + z'\sin\tfrac{\theta_h}{2} \;\approx\; \frac{\theta_h}{2}\,(z + ct) + \xi_x ,
+\]
+<p>with ξ<sub>x</sub> the Gaussian luminous width. It reads θ<sub>h</sub> = +25 mrad straight from the preset, and
+<code>shift_position_to()</code> sets the result without the 180° turn the momenta received. eicBeamShape runs the
+same formula with −0.025, so the two IPs are mirror images:</p>
+\[
+\text{abconv: } x = +12.5\ \text{mrad}\times(z + ct), \qquad
+\text{eicBeamShape (ePIC): } x = -12.5\ \text{mrad}\times(z + ct).
+\]
+<p>The right sign follows from the geometry alone. With crab crossing both bunches are tilted onto the bisector of the
+two beams, at −θ/2 for a proton beam at −θ. An electron moving along −z keeps its x, so it collides at
+x = −(θ/2)·e, and e = z + ct is its position in its bunch.</p>
+
+<h2>Measured on the same events</h2>
+<p>All abconv rows ran on the same head-on Pythia8 file and share abconv's random numbers (the seed is fixed, F1), so
+their IP slopes share their noise. Pythia8's row has its own random numbers.</p>
+<figure id="fig-profile">
+  <p class="fig-title">Mean IP x against the electron's bunch position z + ct</p>
+</figure>
+<div class="table-wrap"><table id="tab-rows"></table></div>
+<p>Negating the presets alone moves the beams to +25 mrad and flips the crab kicks, while the IP takes the ePIC sign:
+the IP is again opposite to the beams. Only the root fix puts every quantity on Pythia8's sign.</p>
+
+<h2>Root fix</h2>
+<p>Four changes, on top of PR #38 (Dmitry Kalinkin's vertex transform, D-user-4):</p>
+<pre><code>// cpp/abconv/Converter.cc — GenEvent::boost(-β) acts as HepBoost(+β)
+<span class="del">-            evt.boost(FourVector(boost.x(), boost.y(), boost.z(), 0));</span>
+<span class="add">+            evt.boost(FourVector(-boost.x(), -boost.y(), -boost.z(), 0));</span>
+
+// cpp/abconv/Converter.cc — PR #38's vertex loop keeps following the momenta
+<span class="del">-                x = CLHEP::HepBoost(-boost) * x;</span>
+<span class="add">+                x = CLHEP::HepBoost(boost) * x;</span>
+
+// cpp/afterburner/Afterburner.cc:380 — rotate +z onto the beams' difference direction
+<span class="del">-        const double rotation_angle_to_z = acos(cos_rotation_angle_to_z);   // TODO back to -acos?</span>
+<span class="add">+        const double rotation_angle_to_z = -acos(cos_rotation_angle_to_z);</span>
+
+// cpp/afterburner/EicConfigurator.cc (all 40 presets) and the defaults in AfterburnerConfig.hh
+<span class="del">-    cfg.crossing_angle_hor = 25e-3;</span>
+<span class="del">-    cfg.crossing_angle_ver = 100e-6;</span>
+<span class="add">+    cfg.crossing_angle_hor = -25e-3;</span>
+<span class="add">+    cfg.crossing_angle_ver = -100e-6;</span></code></pre>
+<p>The vertical preset changes sign too: with +100e-6 the proton would leave at −0.10 mrad. After the fix the
+preset, the beams, the crab kicks and the IP all use the ePIC angles:</p>
+\[
+\hat d_p = (-25.0,\; +0.10)\ \text{mrad},\qquad
+x_{\rm IP} = \frac{\theta}{2}(z + ct) + \xi_x = -12.5\ \text{mrad}\times(z + ct) + \xi_x .
+\]
+
+<h3>What changes for users of abconv output</h3>
+<div class="table-wrap"><table>
+  <tr><th>quantity</th><th>v0.2.1</th><th>root fix</th></tr>
+  <tr><td>beam directions, divergences, crab kicks</td><td>ePIC</td><td>unchanged</td></tr>
+  <tr><td>IP crossing term, x against z + ct</td><td>+12.5 mrad</td><td>−12.5 mrad (ePIC)</td></tr>
+  <tr><td>beam energy shift, proton / electron</td><td>+2.34e-4 / −0.78e-4</td><td>−0.78e-4 / +2.34e-4</td></tr>
+  <tr><td>displaced vertices (with PR #38)</td><td>aligned</td><td>aligned</td></tr>
+  <tr><td>preset values</td><td>+25e-3 / +100e-6</td><td>−25e-3 / −100e-6</td></tr>
+</table></div>
+<p>The crossing term in IP x is small: 12.5 mrad × 7 mm ≈ 0.09 mm at 1σ of the electron bunch, against a 0.1 mm
+luminous width. It matters for anything that uses the luminous-region shape or the x–t correlation of the IP, such
+as a collision time from the vertex.</p>
+
+<h3>Alternatives</h3>
+<ul>
+  <li><b>Turn the IP, x → −x.</b> The smallest change; the preset (+25 mrad) and the output (−25 mrad) keep opposite
+    signs, and the energy split stays as it is.</li>
+  <li><b>Negate the presets only.</b> No fix: the beams move to +25 mrad and the IP stays opposite to them (row
+    "presets negated" above).</li>
+</ul>
+
+<h2>Sources</h2>
+<ul>
+  <li>Code: <code>afterburner/cpp/abconv/Converter.cc</code> (boost line 84, rotation loop 96–104,
+    <code>shift_position_to</code> 114); <code>afterburner/cpp/afterburner/Afterburner.cc</code> (vertex 54–113,
+    beam directions 277, crab kicks 304–311, boost 323–328, rotation 379–382); PR #38 head 5c0b59f.</li>
+  <li>Direct test: <code>beam-validation/abconv-signtest.patch</code> (crossing angles and both signs from the
+    environment; default output event-identical to v0.2.1), <code>beam-validation/signtest.py</code>.</li>
+  <li>Data: <code>/data/dis-autoresearch/beam-validation/</code> (10x100 Pythia8 + eicBeamShape, seed 1001; abconv
+    v0.2.1 variants in <code>signtest/</code>). Page numbers: <code>docs/make_figure_data.py</code>.</li>
+  <li>Findings index: <code>space/reports/FINDINGS.md</code>; full entry:
+    <code>space/reports/imported-dis-autoresearch-findings.md</code> (dis F9).</li>
+</ul>
+
+</main>
+<script>
+(function () {
+  const D = window.FIGURE_DATA, R = D.rows;
+  document.getElementById("n-events").textContent = D.n_events.toLocaleString("en-US");
+  const f = (v, d = 2) => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(d);
+  const sci = (v) => (v >= 0 ? "+" : "−") + (Math.abs(v) * 1e4).toFixed(2) + "e-4";
+
+  const tiles = [
+    ["proton angle, abconv / Pythia8", `${f(R.abconv.proton_h_mrad, 1)} / ${f(R.pythia8.proton_h_mrad, 1)} mrad`, "beams agree"],
+    ["IP x vs z + ct, abconv / Pythia8", `${f(R.abconv.ip_slope_mrad)} / ${f(R.pythia8.ip_slope_mrad)} mrad`, "opposite sign"],
+    ["IP x vs z + ct, root fix", `${f(R.rootfix.ip_slope_mrad)} mrad`, `beams at ${f(R.rootfix.proton_h_mrad, 1)} mrad`],
+    ["proton energy shift, abconv / root fix", `${sci(R.abconv.dE_p)} / ${sci(R.rootfix.dE_p)}`, "the β_z sign"],
+  ];
+  document.getElementById("tiles").innerHTML = tiles.map(([l, v, s]) =>
+    `<div class="tile"><div class="label">${l}</div><div class="value">${v}</div><div class="sub">${s}</div></div>`).join("");
+
+  const names = { pythia8: ["Pythia8 + eicBeamShape (−0.025)", "--c-ref"], abconv: ["abconv v0.2.1", "--c-ab"],
+                  flip: ["presets negated only", "--c-flip"], rootfix: ["root fix", "--c-fix"] };
+  const rows = Object.keys(names).map((k) => {
+    const r = R[k];
+    return `<tr><td><span class="swatch" style="background:var(${names[k][1]})"></span>${names[k][0]}</td>
+      <td class="num">${f(r.proton_h_mrad, 2)}</td><td class="num">${f(r.proton_v_mrad, 3)}</td>
+      <td class="num">${f(r.ip_slope_mrad)} ± ${r.ip_slope_err.toFixed(2)}</td>
+      <td class="num">${f(r.crab_urad_per_mm)} ± ${r.crab_err.toFixed(2)}</td>
+      <td class="num">${sci(r.dE_p)}</td><td class="num">${sci(r.dE_e)}</td></tr>`;
+  }).join("");
+  document.getElementById("tab-rows").innerHTML =
+    `<tr><th>sample</th><th class="num">proton h [mrad]</th><th class="num">proton v [mrad]</th>
+     <th class="num">IP x vs z + ct [mrad]</th><th class="num">proton crab [µrad/mm]</th>
+     <th class="num">ΔE/E proton</th><th class="num">ΔE/E electron</th></tr>` + rows;
+
+  const P = D.profiles, prof = (k) => P[k].ip_x_um_vs_e_mm;
+  const series = [
+    { key: "pythia8", marker: "circle", label: "Pythia8", labelDy: 10, width: 3.5 },
+    { key: "abconv", marker: "square", label: "abconv v0.2.1" },
+    { key: "rootfix", marker: "triangle", fill: "none", dash: "5 3", label: "root fix", labelDy: -8 },
+  ].map((s) => ({ ...s, name: names[s.key][0], color: names[s.key][1], ...prof(s.key) }));
+  window.profileChart(document.getElementById("fig-profile"), {
+    series, xd: [-20, 20], yd: [-300, 300], xLabel: "z + ct: electron position in its bunch [mm]",
+    yLabel: "mean IP x [µm]", xName: "z + ct", xUnit: "mm", yUnit: "µm",
+    aria: "Mean IP x rises with z + ct in abconv v0.2.1 and falls in Pythia8 and in the root fix, which lie on top of each other.",
+  });
+  const cap = document.createElement("figcaption");
+  cap.textContent = `Slopes: abconv ${f(R.abconv.ip_slope_mrad)}, Pythia8 ${f(R.pythia8.ip_slope_mrad)}, root fix ${f(R.rootfix.ip_slope_mrad)} mrad. Bins of 3 mm; error bars are the error of the mean.`;
+  document.getElementById("fig-profile").appendChild(cap);
+})();
+document.addEventListener("DOMContentLoaded", () => {
+  const go = () => window.renderMathInElement && renderMathInElement(document.body, {
+    delimiters: [{ left: "\\[", right: "\\]", display: true }, { left: "\\(", right: "\\)", display: false }], throwOnError: false });
+  if (window.renderMathInElement) go(); else window.addEventListener("load", go);
+});
+</script>
+</body>
+</html>

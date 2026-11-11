@@ -34,6 +34,7 @@ No farm. Everything runs on the local machine (24 cores).
 | `generator_benchmarks/` | eic/generator_benchmarks; `benchmarks/afterburner/` is the ruler | gitlink upstream main 1a92e6b. The benchmark lives on the local branch `afterburner-benchmark` (2a87b52), unpushed: check it out before any run |
 | `beam-validation/` | the 2026-11-07 study: sign checks, displaced-vertex check, the sign-test patch, the PR #38 review | — |
 | `scripts/` | `in-eic-xl.sh`, `build-abconv.sh`, `run-benchmark.sh` | — |
+| `docs/` | explainer page on the frame flip (F2) and its root fix; `make_figure_data.py` writes its numbers and the σ(t0) table | — |
 
 To build abconv from a tree and run the ruler against it:
 
@@ -125,10 +126,9 @@ The user reviews each phase's report before the next starts.
   `{space}/reports/phase0_findings.md`, and update FINDINGS.md.
 - Read the in-scope tracker issues (#16, #17, #34, #5, #4) with their comments, and the open PRs (#30, #36,
   #38, #39); list per item the code it touches and any overlap with the work items.
-- Re-derive the collision-time-from-vertex fit (σ(t0) from z, from z and x, and the cross-applied
-  estimator) as `beam-validation/t0_vertex.py`. Reference (10x100, 2026-11-07): σ(t0) 117 ps from nothing,
-  23.3 ps from z, 17.4 ps from z and x (Pythia8 + eicBeamShape); a (z, x) fit on abconv output applied to
-  Pythia8 gives 35.6 ps. The replies built on them are in `Elke_answer.md`, kept out of git.
+- Done 2026-11-11: the collision-time-from-vertex fit (σ(t0) from nothing, z, z and y, z and x, with x
+  resolution, and the cross-applied estimator) is `docs/make_figure_data.py`; the table is key `t0_ps` of
+  `docs/figure-data.js`. The replies built on it (`Elke_answer.md`, `docs/t0-from-vertex.html`) stay out of git.
 - **Done:** R0–R2 recorded, every finding with a benchmark check reproduces on R1, reproducers written,
   tracker survey written, ledger outcome appended.
 

@@ -1,0 +1,117 @@
+/* Shared page style for docs/*.html. Colors are tokens; dark mode redefines them. */
+:root {
+  --bg: #fafaf8;
+  --surface: #ffffff;
+  --ink: #1c1e22;
+  --ink-2: #464b53;
+  --muted: #6f7680;
+  --rule: #e2e4e8;
+  --grid: #eceef1;
+  --code-bg: #f2f3f5;
+  --note-bg: #f4f6fb;
+  --c-ref: #1f66c9;   /* Pythia8 + eicBeamShape, the reference */
+  --c-ab: #c4561a;    /* abconv v0.2.1 */
+  --c-fix: #7b3fc4;   /* root fix */
+  --c-flip: #7c818a;  /* presets negated only */
+  --c-p: #1f66c9;     /* proton bunch */
+  --c-e: #c4561a;     /* electron bunch */
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131518; --surface: #1a1d21; --ink: #e5e7ea; --ink-2: #b8bdc5; --muted: #8b929c;
+    --rule: #2b2f35; --grid: #23272d; --code-bg: #21252a; --note-bg: #1b2130;
+    --c-ref: #6ea6ee; --c-ab: #ef9a5c; --c-fix: #b58df0; --c-flip: #9aa0a9; --c-p: #6ea6ee; --c-e: #ef9a5c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131518; --surface: #1a1d21; --ink: #e5e7ea; --ink-2: #b8bdc5; --muted: #8b929c;
+  --rule: #2b2f35; --grid: #23272d; --code-bg: #21252a; --note-bg: #1b2130;
+  --c-ref: #6ea6ee; --c-ab: #ef9a5c; --c-fix: #b58df0; --c-flip: #9aa0a9; --c-p: #6ea6ee; --c-e: #ef9a5c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+main { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 1.85rem; line-height: 1.25; margin: 0 0 8px; letter-spacing: -0.01em; }
+h2 { font-size: 1.3rem; margin: 2.4em 0 0.6em; padding-top: 0.6em; border-top: 1px solid var(--rule); }
+h3 { font-size: 1.05rem; margin: 1.6em 0 0.4em; }
+p, li { color: var(--ink); }
+.lead { font-size: 1.08rem; color: var(--ink-2); margin: 0 0 1.2em; }
+.meta { color: var(--muted); font-size: 0.9rem; margin-bottom: 1.6em; }
+a { color: var(--c-ref); }
+code, pre { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.88em; }
+code { background: var(--code-bg); padding: 0.1em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+pre code { overflow-wrap: normal; }
+pre { background: var(--code-bg); padding: 12px 14px; border-radius: 8px; overflow-x: auto; line-height: 1.45; }
+pre code { background: none; padding: 0; }
+.del { color: var(--c-ab); }
+.add { color: var(--c-fix); }
+
+.note { background: var(--note-bg); border-left: 3px solid var(--c-ref); padding: 12px 16px; border-radius: 0 8px 8px 0; margin: 1.2em 0; }
+.note p { margin: 0.3em 0; }
+
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 1.4em 0; }
+.tile { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.tile .label { font-size: 0.82rem; color: var(--muted); }
+.tile .value { font-size: 1.05rem; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+.tile .sub { font-size: 0.82rem; color: var(--ink-2); }
+
+.table-wrap { overflow-x: auto; margin: 1em 0; }
+table { border-collapse: collapse; width: 100%; font-size: 0.92rem; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+th { color: var(--ink-2); font-weight: 600; }
+td.num, th.num { text-align: right; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: baseline; }
+
+figure { margin: 1.6em 0; background: var(--surface); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 14px 10px; position: relative; }
+figure svg { display: block; width: 100%; height: auto; color: var(--ink); }
+figcaption { font-size: 0.9rem; color: var(--ink-2); margin-top: 8px; }
+.fig-title { font-weight: 600; font-size: 0.95rem; margin: 0 0 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.85rem; color: var(--ink-2); margin: 0 0 6px; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend svg { width: 22px; height: 12px; display: inline-block; }
+.panels { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 640px) { .panels { grid-template-columns: 1fr; } }
+
+.tooltip {
+  position: absolute; pointer-events: none; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--rule); border-radius: 6px; padding: 5px 8px; font-size: 0.8rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12); white-space: nowrap; opacity: 0; transition: opacity .08s;
+}
+.tooltip.on { opacity: 1; }
+
+details { margin: 1em 0; }
+summary { cursor: pointer; color: var(--ink-2); }
+blockquote { margin: 1em 0; padding: 0.2em 1em; border-left: 3px solid var(--rule); color: var(--ink-2); }
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+
+/* inline SVG diagram classes */
+.d-ink { stroke: currentColor; fill: none; }
+.d-thin { stroke: var(--muted); fill: none; stroke-width: 1; }
+.d-dot { stroke: var(--muted); fill: none; stroke-width: 1.2; stroke-dasharray: 2 4; }
+.d-text { fill: currentColor; font-size: 13px; }
+.d-small { fill: var(--ink-2); font-size: 11.5px; }
+.d-ref { stroke: var(--c-ref); fill: none; }
+.d-ab { stroke: var(--c-ab); fill: none; }
+.d-fix { stroke: var(--c-fix); fill: none; }
+.t-ref { fill: var(--c-ref); } .t-ab { fill: var(--c-ab); } .t-fix { fill: var(--c-fix); }
+.f-p { fill: var(--c-p); fill-opacity: 0.14; stroke: var(--c-p); stroke-width: 1.2; }
+.f-e { fill: var(--c-e); fill-opacity: 0.18; stroke: var(--c-e); stroke-width: 1.2; }
+.f-ab { fill: var(--c-ab); fill-opacity: 0.16; stroke: var(--c-ab); stroke-width: 1.2; }
+.f-fix { fill: var(--c-fix); fill-opacity: 0.16; stroke: var(--c-fix); stroke-width: 1.2; }
+.dot-e { fill: var(--c-e); stroke: var(--surface); stroke-width: 2; }
+
+/* chart classes (docs/charts.js) */
+.c-grid { stroke: var(--grid); stroke-width: 1; }
+.c-axis { stroke: var(--muted); stroke-width: 1; }
+.c-tick { fill: var(--muted); font-size: 11px; font-variant-numeric: tabular-nums; }
+.c-label { fill: var(--ink-2); font-size: 12px; }
+.c-zero { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
+.c-point-label { fill: var(--ink); font-size: 12px; }

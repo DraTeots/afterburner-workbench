@@ -11,6 +11,7 @@ against Pythia8 with eicBeamShape ([eic/eicSimuBeamEffects](https://github.com/e
 | `beam-validation/` | the 2026-11-07 afterburner-vs-Pythia8 study: sign checks, displaced vertices, PR #38 review |
 | `scripts/` | run a command in eic_xl, build abconv, run the benchmark against a built abconv |
 | `space/` | findings, decisions, questions, reports of the repair program |
+| `docs/` | explainer page: the abconv frame flip and its root fix |
 | `afterburner-loop.md`, `work-common.md` | the program file and the common rules of an autonomous run |
 
 ## Setup
