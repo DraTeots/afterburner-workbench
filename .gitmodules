@@ -1,0 +1,9 @@
+[submodule "afterburner"]
+	path = afterburner
+	url = https://github.com/eic/afterburner.git
+[submodule "eicSimuBeamEffects"]
+	path = eicSimuBeamEffects
+	url = https://github.com/eic/eicSimuBeamEffects.git
+[submodule "generator_benchmarks"]
+	path = generator_benchmarks
+	url = https://github.com/eic/generator_benchmarks.git

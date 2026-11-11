@@ -1,0 +1,22 @@
+# Findings F1–F10
+
+The index of every finding of this program (rules: `work-common.md`, Findings). The full entries of F1–F3
+and F10 are in `imported-dis-autoresearch-findings.md` (dis-autoresearch numbers F7, F9, F10, F8); the
+others come from the 2026-11-07 beam-validation study and the generator_benchmarks afterburner benchmark
+(`generator_benchmarks/benchmarks/afterburner/README.md`, Status). Phase 0 writes a reproducer per finding
+into `phase0_findings.md`.
+
+| status | # | finding | component | owner |
+|---|---|---|---|---|
+| OPEN | F1 | abconv repeats the same beam configurations in every run: the smearer is seeded with 1 (`Afterburner.cc` line 31, `_smear(1)`); `AfterburnerConfig::random_seed` is declared and unused, and abconv has no seed option. Two head-on inputs with different Pythia8 seeds get identical IPs and beam four-vectors in 2000 of 2000 events. Benchmark check: seed. (dis F7) | eic/afterburner `Afterburner.cc`, `ArgumentProcessor.cc` | Phase 1, branch `fix/smear-seed` |
+| OPEN | F2 | The interaction point is built in the configured +25 mrad frame while the momenta leave in the −25 mrad frame: IP x = +(θ/2)(z + ct), +12.6…+12.9 mrad against Pythia8's −12.2…−12.7, in every setup. Cause: `GenEvent::boost(β)` acts as `HepBoost(−β)` and the alignment rotation matches it (`// TODO back to -acos?`), so the momenta are turned 180° about z and the bunch-crossing IP is not. Benchmark check: IP crossing slope. (dis F9) | eic/afterburner `Converter.cc` boost, `Afterburner.cc` rotation and presets | Phase 1, branch `fix/ip6-frame` on PR #38 (D-user-4) |
+| OPEN | F3 | abconv applies no beam energy spread: relative rms 1–6 × 10⁻⁶ (the boost alone) against (6–11) × 10⁻⁴ in eicBeamShape's steering files. Benchmark check: energy spread, kept a failing check (D-user-7). (dis F10) | eic/afterburner configuration and smearing | Phase 1, branch `feat/beam-energy-spread` |
+| OPEN | F4 | Displaced decay vertices stay in the head-on frame, 25 mrad off their parents' momenta (median 24.96 mrad, 10x100). PR #38 fixes it exactly when the input carries vertex times; with times 0 half the error remains (12.6 mrad). Benchmark check: displaced vertices. Review text: `beam-validation/pr38-comment.md`. | eic/afterburner `Converter.cc` | PR #38 (Dmitry Kalinkin) |
+| OPEN | F5 | The vertical luminous width is 4–8 % apart in 6 of 19 setups (10x100 both regimes, 18x275 hidiv, the e+Au setups except 18x110): abconv computes it from β*·ε of the two beams, eicBeamShape takes the steering file's `sigmaVertexY` (the CDR tables). 10x100_hidiv: 8.70 µm against 8.04 µm. Which value is current is a question for the machine group. | eic/afterburner presets; eicSimuBeamEffects steering files | issue draft only (D-user-5) |
+| OPEN | F6 | abconv's head-on → crossing boost shifts the beam energies: hadron +2.34 × 10⁻⁴, electron −0.78 × 10⁻⁴ relative, the same in every setup (together θ²/4, since s is invariant). Pythia8 shifts neither. The root fix of F2 reverses the split. Information only; the PR text of F2 states it. | eic/afterburner `Converter.cc` boost | rides F2 |
+| OPEN | F7 | `abconv --version` prints 0.1.3 at tag v0.2.1 and on main (`ArgumentProcessor.cc` line 39, a string literal); `cpp/CMakeLists.txt` declares project version 1.0.0. | eic/afterburner `ArgumentProcessor.cc`, `cpp/CMakeLists.txt` | Phase 1, branch `fix/version-string` |
+| FIXED | F8 | abconv's histogrammer (v0.2.1) takes the first status-4 particle as the hadron beam; Pythia8 writes the proton first, other generators may not. Fixed upstream on main (32c9429, select by PDG id); eic_xl 26.11 still builds v0.2.1. | eic/afterburner `Histogrammer.cc` | upstream main |
+| OPEN | F9 | generator_benchmarks' `pythia8` benchmark runs eicBeamShape with crossing angle +0.025; the eicSimuBeamEffects README requires −0.025 at IP6. | eic/generator_benchmarks `benchmarks/pythia8/Snakefile` | Phase 1, issue draft and branch `fix/pythia8-crossing-angle` in generator_benchmarks |
+| OPEN | F10 | The meson-structure 2026-07 campaign gave 9x100 high-divergence optics (`ip6_hidiv_100x10`) and 9x130 high-acceptance optics (`ip6_ep_130x10` = `ip6_hiacc_100x10`). The preset name `ip6_ep_*` does not say which optics it carries, and abconv has no high-divergence 130 GeV preset while eicBeamShape has steering files for it. Related tracker items: #16, #34. (dis F8) | eic/afterburner presets; meson-structure simulation pipeline | Phase 2 (#16, #34) |
+
+Counts: 9 OPEN, 1 FIXED (upstream). Blocking: none.
