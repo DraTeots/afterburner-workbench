@@ -115,3 +115,23 @@ blockquote { margin: 1em 0; padding: 0.2em 1em; border-left: 3px solid var(--rul
 .c-label { fill: var(--ink-2); font-size: 12px; }
 .c-zero { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 3 3; }
 .c-point-label { fill: var(--ink); font-size: 12px; }
+
+/* beam drawings: proton blue, electron orange */
+.d-p { stroke: var(--c-p); fill: none; }
+.d-e { stroke: var(--c-e); fill: none; }
+.d-axis { stroke: var(--muted); stroke-width: 1; fill: none; }
+.t-p { fill: var(--c-p); } .t-e { fill: var(--c-e); }
+.dot-p { fill: var(--c-p); stroke: var(--surface); stroke-width: 2; }
+.d-b { font-weight: 600; }
+.mk-ink { fill: var(--ink); } .mk-mu { fill: var(--muted); } .mk-p { fill: var(--c-p); } .mk-e { fill: var(--c-e); }
+.mk-ab { fill: var(--c-ab); } .mk-fix { fill: var(--c-fix); } .mk-ref { fill: var(--c-ref); }
+.story { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 1.2em 0; }
+@media (max-width: 720px) { .story { grid-template-columns: 1fr; } }
+.story > div { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 12px 14px; }
+.story h3 { margin: 0 0 4px; font-size: 1rem; }
+.story p { margin: 0.3em 0; font-size: 0.92rem; color: var(--ink-2); }
+.story .who { font-size: 0.82rem; color: var(--muted); }
+.ok { color: var(--c-fix); font-weight: 600; } .bad { color: var(--c-ab); font-weight: 600; }
+dl.vars { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 1em 0; }
+dl.vars dt { font-weight: 600; white-space: nowrap; }
+dl.vars dd { margin: 0; color: var(--ink-2); }

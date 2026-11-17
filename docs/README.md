@@ -2,7 +2,7 @@
 
 | page | content |
 |---|---|
-| `abconv-frame-flip.html` | which signs in abconv are flipped, why its beams come out right and its interaction point mirrored (finding F2), and the root fix |
+| `abconv-frame-flip.html` | what was wrong with the crossing frame in abconv (finding F2) and what eic/afterburner PR #38 and PR #42 change, with drawings |
 
 The page loads `style.css`, `charts.js`, `figure-data.js` and KaTeX from cdn.jsdelivr.net. To view it, serve the
 folder, for example:
