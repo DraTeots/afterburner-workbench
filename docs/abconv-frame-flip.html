@@ -18,7 +18,7 @@
 <marker id="mk-ink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-ink"/></marker><marker id="mk-mu" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-mu"/></marker><marker id="mk-p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-p"/></marker><marker id="mk-e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-e"/></marker><marker id="mk-ab" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-ab"/></marker><marker id="mk-fix" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-fix"/></marker><marker id="mk-ref" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="mk-ref"/></marker>
 </defs></svg>
 
-<h1>abconv crossing frame: what was wrong, PR #38 and PR #42</h1>
+<h1>abconv crossing frame: defects of v0.2.1 and the changes in PR #38 and PR #42</h1>
 <p class="lead">abconv turns a head-on collision into one with the EIC crossing angle. In v0.2.1 the beams came out
 right, but two kinds of positions did not follow them: decay vertices stayed where the head-on event had them, and
 the interaction point was built for a crossing angle of the opposite sign. PR #38 repairs the decay vertices. PR #42
@@ -44,7 +44,7 @@ NC DIS 10 &lt; Q² &lt; 100 GeV², <span id="n-events"></span> events, written b
 
 <div class="tiles" id="tiles"></div>
 
-<h2>1. Words used on this page</h2>
+<h2>1. Terms</h2>
 <dl class="vars">
   <dt>beam, bunch</dt><dd>The particles do not come as a steady stream. They come in packets called bunches, about
     1 cm (electrons) to several cm (protons) long and a fraction of a millimetre wide.</dd>
@@ -60,11 +60,11 @@ NC DIS 10 &lt; Q² &lt; 100 GeV², <span id="n-events"></span> events, written b
     vertex away from the IP.</dd>
 </dl>
 
-<h2>2. The ePIC frame: electrons along −z, protons out at −25 mrad</h2>
+<h2>2. ePIC frame and beam directions</h2>
 <p>The electron beam runs along −z. The proton beam leaves at θ = −25 mrad, toward −x, and +0.10 mrad vertically.
 x points to the centre of the accelerator ring and y points up.</p>
 <div class="panels">
-  <figure><p class="fig-title">Seen from above (x–z plane)</p><svg viewBox="0 0 400 250" role="img" aria-label="Top view. The electron beam runs along minus z. The proton beam crosses it and leaves toward plus z and minus x, 25 mrad from the z axis.">
+  <figure><p class="fig-title">Seen from above (x-z plane)</p><svg viewBox="0 0 400 250" role="img" aria-label="Top view. The electron beam runs along minus z. The proton beam crosses it and leaves toward plus z and minus x, 25 mrad from the z axis.">
       <line x1="24" y1="125" x2="384" y2="125" class="d-axis" marker-end="url(#mk-mu)"/>
       <text x="392" y="143" text-anchor="end" class="d-small">+z</text>
       <line x1="200" y1="236" x2="200" y2="20" class="d-axis" marker-end="url(#mk-mu)"/>
@@ -82,7 +82,7 @@ x points to the centre of the accelerator ring and y points up.</p>
       <circle cx="200" cy="125" r="3.5" class="mk-ink"/>
     </svg>
     <figcaption>The protons leave toward the outside of the ring, where the far-forward detectors are.</figcaption></figure>
-  <figure><p class="fig-title">Seen from the side (y–z plane)</p><svg viewBox="0 0 400 250" role="img" aria-label="Side view. The electron beam runs along minus z. The proton beam leaves 0.10 mrad above the z axis.">
+  <figure><p class="fig-title">Seen from the side (y-z plane)</p><svg viewBox="0 0 400 250" role="img" aria-label="Side view. The electron beam runs along minus z. The proton beam leaves 0.10 mrad above the z axis.">
       <line x1="24" y1="125" x2="384" y2="125" class="d-axis" marker-end="url(#mk-mu)"/>
       <text x="392" y="143" text-anchor="end" class="d-small">+z</text>
       <line x1="200" y1="236" x2="200" y2="20" class="d-axis" marker-end="url(#mk-mu)"/>
@@ -98,7 +98,7 @@ x points to the centre of the accelerator ring and y points up.</p>
 </div>
 <p class="meta">Angles are drawn much larger than they are: 25 mrad about 15 times, 0.10 mrad about 1400 times.</p>
 
-<h2>3. The presets of v0.2.1 point the proton to +25 mrad</h2>
+<h2>3. Beam directions in the v0.2.1 presets</h2>
 <p>abconv describes each beam by a direction: an arrow of length 1. Its three numbers say how far the arrow goes
 along x, y and z.</p>
 \[
@@ -152,7 +152,7 @@ along x, y and z.</p>
     preset. Sections 6 and 7 show how.</li>
 </ul>
 
-<h2>4. Two bunches, one collision: p, e, ct and z</h2>
+<h2>4. Bunch positions p and e, collision time ct and position z</h2>
 <p>Each collision comes from a proton at position <em>p</em> in its bunch and an electron at position <em>e</em> in
 its bunch. Both abconv and eicBeamShape set</p>
 \[
@@ -199,7 +199,7 @@ same place: p + ct = e − ct. Solve for ct, then put it back to get z.</p>
   that will collide.</figcaption>
 </figure>
 <figure>
-  <p class="fig-title">The same pair as a timetable: position z against time ct</p>
+  <p class="fig-title">Position z against time ct for the same pair</p>
   <svg viewBox="0 0 520 300" role="img" aria-label="Position against time. The proton line starts at z = p and rises to the right, the electron line starts at z = e and rises to the left. They cross at z = (e+p)/2 and ct = (e−p)/2.">
     <line x1="30" y1="250" x2="500" y2="250" class="d-axis" marker-end="url(#mk-mu)"/><text x="500" y="268" text-anchor="end" class="d-small">z (position)</text>
     <line x1="260" y1="285" x2="260" y2="20" class="d-axis" marker-end="url(#mk-mu)"/><text x="268" y="24" class="d-small">ct (time)</text>
@@ -219,7 +219,7 @@ same place: p + ct = e − ct. Solve for ct, then put it back to get z.</p>
   the proton's.</figcaption>
 </figure>
 
-<h2>5. The collision point moves toward −x as z + ct grows</h2>
+<h2>5. IP x against z + ct with crab crossing</h2>
 <p>With a crossing angle the bunches would pass through each other at a slant and overlap badly. Crab cavities
 therefore tilt both bunches so that, at the IP, both lie along the line halfway between the two beams (the
 bisector). For a proton beam at −25 mrad that line is at −θ/2 = −12.5 mrad.</p>
@@ -250,7 +250,7 @@ x_{\rm IP} = -\frac{\theta}{2}\,(z + ct) + \xi_x, \qquad \theta = 25\ \text{mrad
 <p>where ξ<sub>x</sub> is the random position across the bunch width (about 0.1 mm). The slope of IP x against
 z + ct must be <b>−12.5 mrad</b>. This slope is the number that tells right from wrong on this page.</p>
 
-<h2>6. A boost shows the event to a moving observer</h2>
+<h2>6. Boost and boost vector</h2>
 <p>A <b>boost</b> answers the question: how does the same event look to an observer who moves at constant
 velocity? It is the Lorentz transformation between two frames that move against each other, with no turning
 involved. The <b>boost vector</b> \(\vec\beta\) is the velocity of that motion divided by c: its direction is the
@@ -260,7 +260,7 @@ the front. Nothing happened to the rain. The slant is the car's velocity, seen f
 backward: <em>opposite</em> to the car's motion.</p>
 <p>That last point gives two ways to use one vector, and they differ by a sign:</p>
 <div class="panels">
-  <figure><p class="fig-title">Active: push the particles by β</p>
+  <figure><p class="fig-title">Active boost: particles pushed by β</p>
     <svg viewBox="0 0 400 220" role="img" aria-label="Active boost: both beam arrows, first along plus and minus z, get an extra velocity toward plus x and tilt toward plus x.">
       <line x1="200" y1="120" x2="330" y2="120" class="d-dot"/><line x1="200" y1="120" x2="70" y2="120" class="d-dot"/>
       <line x1="200" y1="120" x2="327.6" y2="95.2" class="d-p" stroke-width="2.4" marker-end="url(#mk-p)"/>
@@ -273,7 +273,7 @@ backward: <em>opposite</em> to the car's motion.</p>
       <g transform="translate(30 206)"><line x1="0" y1="0" x2="26" y2="0" class="d-axis" marker-end="url(#mk-mu)"/><line x1="0" y1="0" x2="0" y2="-26" class="d-axis" marker-end="url(#mk-mu)"/><text x="31" y="4" class="d-small">z</text><text x="-4" y="-31" class="d-small">x</text></g>
     </svg>
     <figcaption>This is Λ(β). CLHEP's <code>HepBoost(β)</code> works this way.</figcaption></figure>
-  <figure><p class="fig-title">Passive: move the observer by β</p>
+  <figure><p class="fig-title">Passive boost: observer moving with β</p>
     <svg viewBox="0 0 400 220" role="img" aria-label="Passive boost: the observer moves toward plus x, so both beam arrows appear tilted toward minus x.">
       <line x1="200" y1="100" x2="330" y2="100" class="d-dot"/><line x1="200" y1="100" x2="70" y2="100" class="d-dot"/>
       <line x1="200" y1="100" x2="327.6" y2="124.8" class="d-p" stroke-width="2.4" marker-end="url(#mk-p)"/>
@@ -291,8 +291,8 @@ backward: <em>opposite</em> to the car's motion.</p>
 <p>For particles that move at nearly c, a sideways boost of size β tilts the direction by an angle of about β
 radians. So a boost of 0.0125 across the beams tilts both beams by 12.5 mrad, to the same side.</p>
 
-<h3>The boost vector abconv uses</h3>
-<p>It is half the sum of the two beam directions (<code>Afterburner.cc</code> v0.2.1, lines 323–328):</p>
+<h3>Boost vector in abconv</h3>
+<p>It is half the sum of the two beam directions (<code>Afterburner.cc</code> v0.2.1, lines 323-328):</p>
 \[
 \vec\beta = \tfrac12(\hat d_p + \hat d_e) \approx \Big(\tfrac{\theta_h}{2},\; -\tfrac{\theta_v}{2},\; -\tfrac{\theta_h^2}{4}\Big).
 \]
@@ -317,7 +317,7 @@ radians. So a boost of 0.0125 across the beams tilts both beams by 12.5 mrad, to
 brings the electron back onto −z and takes the proton to the full θ. Boost and rotation together make the crossing
 angle.</p>
 
-<h2>7. In v0.2.1 two flipped signs cancel in the momenta</h2>
+<h2>7. Momentum transform in v0.2.1</h2>
 <p>abconv calls <code>evt.boost(β)</code> (<code>Converter.cc</code> line 84). This is the passive kind: the
 particles receive Λ(−β). With the preset θ<sub>h</sub> = +25 mrad, β points to +x, so the momenta are pushed by
 12.5 mrad toward <b>−x</b>: the first flip. The rotation that follows is built to match it (the line carries the
@@ -348,8 +348,8 @@ comment <code>// TODO back to -acos?</code>) and also turns toward −x: the sec
   beams from a preset of the wrong sign. The output is the configured geometry turned by 180° about z, which also
   flips the vertical angle from −0.10 to +0.10 mrad.</figcaption>
 </figure>
-<h3>Step by step: what v0.2.1 does against what is needed</h3>
-<p>"Needed" is the straightforward way: preset −25 mrad, active boost, rotation toward the proton side.</p>
+<h3>v0.2.1 transform against the required transform, piece by piece</h3>
+<p>"Needed" is the direct way: preset −25 mrad, active boost, rotation toward the proton side.</p>
 <div class="table-wrap"><table>
   <tr><th>piece of the transform</th><th>v0.2.1 (preset +25 mrad)</th><th>needed (preset −25 mrad)</th><th>same?</th></tr>
   <tr><td>sideways push of every momentum</td><td>β points to +x, used passively: 12.5 mrad toward −x</td><td>β points to −x, used actively: 12.5 mrad toward −x</td><td class="ok">yes</td></tr>
@@ -359,7 +359,7 @@ comment <code>// TODO back to -acos?</code>) and also turns toward −x: the sec
 </table></div>
 <p>Three of the four pieces are identical. That is why directions, divergences and crab kicks of v0.2.1 are right.</p>
 
-<h3>The fourth piece changes the beam energies</h3>
+<h3>Beam energy shifts</h3>
 <p>Two effects add up for each beam:</p>
 <ul>
   <li>The sideways push adds a little speed to every particle. Both beams gain θ²/8 = 0.78 × 10⁻⁴ of their energy.</li>
@@ -386,13 +386,13 @@ comment <code>// TODO back to -acos?</code>) and also turns toward −x: the sec
   across the beams. No push along the beams is left, and the beams share equally.</figcaption>
 </figure>
 
-<h2>8. Positions were not moved with the momenta</h2>
-<h3>Decay vertices stayed in the head-on frame (repaired by PR #38)</h3>
+<h2>8. Vertex positions in v0.2.1</h2>
+<h3>Decay vertices (PR #38)</h3>
 <p><code>GenEvent::boost</code> and abconv's rotation loop act on momenta only. Vertex positions stayed as in the
 head-on event. A Λ that flies forward got its momentum turned by 25 mrad, while the point where it decays stayed on
 the old line.</p>
 <div class="panels">
-  <figure><p class="fig-title">v0.2.1: the decay point is off the flight line</p>
+  <figure><p class="fig-title">v0.2.1: decay vertex and Λ momentum</p>
     <svg viewBox="0 0 400 210" role="img" aria-label="The Lambda momentum points 25 mrad away from the line from the interaction point to the decay vertex.">
       <line x1="60" y1="70" x2="300" y2="70" class="d-ab" stroke-width="1.5" stroke-dasharray="5 4"/>
       <line x1="60" y1="70" x2="171" y2="115" class="d-ink" stroke-width="2.4" marker-end="url(#mk-ink)"/>
@@ -400,12 +400,12 @@ the old line.</p>
       <circle cx="60" cy="70" r="4" class="mk-ink"/><circle cx="300" cy="70" r="5" class="mk-ab"/>
       <path d="M150,70 A90,90 0 0 1 143.4,103.7" class="d-ab" stroke-width="1.3"/>
       <text x="156" y="92" class="d-small t-ab">25 mrad</text>
-      <text x="56" y="56" class="d-small">IP</text><text x="300" y="56" text-anchor="middle" class="d-small t-ab">decay vertex, not moved</text>
+      <text x="56" y="56" class="d-small">IP</text><text x="300" y="56" text-anchor="middle" class="d-small t-ab">decay vertex: unmoved</text>
       <text x="58" y="142" class="d-text">Λ momentum, moved</text>
       <text x="344" y="122" text-anchor="end" class="d-small">decay products</text>
     </svg>
     <figcaption>Measured: 24.96 mrad between displacement and momentum (median, 11 924 decays).</figcaption></figure>
-  <figure><p class="fig-title">PR #38: positions get the same boost and rotation</p>
+  <figure><p class="fig-title">PR #38: decay vertex and Λ momentum</p>
     <svg viewBox="0 0 400 210" role="img" aria-label="The decay vertex lies on the line of the Lambda momentum.">
       <line x1="60" y1="70" x2="300" y2="167" class="d-fix" stroke-width="1.5" stroke-dasharray="5 4"/>
       <line x1="60" y1="70" x2="171" y2="115" class="d-ink" stroke-width="2.4" marker-end="url(#mk-ink)"/>
@@ -419,7 +419,7 @@ the old line.</p>
 <p>A position has a time as well, and a boost mixes the two. So the input must carry correct vertex times: with all
 times set to 0, half of the error stays (12.6 mrad).</p>
 
-<h3>The interaction point is built from the preset: +25 mrad instead of −25 mrad (repaired by PR #42)</h3>
+<h3>Interaction point construction (PR #42)</h3>
 <p>The IP is made by <code>generate_vertx_with_bunch_interaction()</code>, which is line for line eicBeamShape's. It
 works in two steps and takes the angle θ<sub>h</sub> straight from the preset.</p>
 <div class="panels">
@@ -508,7 +508,7 @@ PR #38 does not change it.</p>
 </div>
 <p class="meta">Top view. Angles drawn about 15 times larger than 25 mrad.</p>
 
-<h2>9. Measured: the IP slope has the wrong sign before, the right sign after</h2>
+<h2>9. Measured beam angles, IP slopes and energy shifts</h2>
 <p>All abconv rows ran on the same head-on Pythia8 file and share abconv's random numbers (the seed is fixed, F1), so
 their IP slopes share their noise. Pythia8's row has its own random numbers. The "signs fixed" row is the direct
 test of 2026-11-07 (v0.2.1 with <code>evt.boost(−β)</code>, <code>−acos</code> and presets −25e-3 / −100e-6). PR #42
@@ -520,7 +520,7 @@ reports the same IP slope, −12.29 ± 0.10 mrad.</p>
 <p>Negating the presets alone is no fix: the beams move to +25 mrad and the crab kicks flip, so the IP is again
 opposite to the beams.</p>
 
-<h2>10. PR #42: one transform, presets with the ePIC angles</h2>
+<h2>10. Changes in PR #42</h2>
 <ul>
   <li><b>One transform.</b> <code>Afterburner::crossing_transform</code> builds a rotation of +z onto the head-on
     beam axis, then an active boost perpendicular to that axis (second row of the figure in section 7). No passive
@@ -528,9 +528,10 @@ opposite to the beams.</p>
   <li><b>Momenta and vertices alike.</b> <code>Converter.cc</code> applies <code>boost * rotation</code> to every
     momentum and to every vertex four-position. PR #38's separate vertex loop is absorbed.</li>
   <li><b>Presets mean what they say.</b> <code>crossing_angle_hor</code> is the hadron beam's angle to +z in the
-    x–z plane, positive toward +x: −25e-3 at IP6 (40 presets), +35e-3 at IP8 (14 presets, before −35e-3).
-    <code>crossing_angle_ver</code> is its angle in the y–z plane, positive toward +y: it stays +100e-6, and now
-    means up.</li>
+    x-z plane, positive toward +x: −25e-3 at IP6 (40 presets), +35e-3 at IP8 (14 presets, before −35e-3).
+    <code>crossing_angle_ver</code> is its angle in the y-z plane, positive toward +y: it stays +100e-6, and now
+    means up. That is how the EIC beam-effects note gives it (a 100 µrad tilt that puts the hadron beam to higher
+    y) and how eicBeamShape sets it (<code>mXAngleY = +0.0001</code>).</li>
   <li><b>The vertex code is not touched.</b> It reads −25e-3 and gives −12.5 mrad, as eicBeamShape does.</li>
   <li><b>Beam energies.</b> The boost is perpendicular to both beams, so both energies grow by the same factor
     γ ≈ 1 + θ²/8 = 1 + 7.8 × 10⁻⁵. For nominal energies at the crossing, generate head-on at E·cos(θ/2).</li>
@@ -550,35 +551,35 @@ const CLHEP::HepLorentzRotation transform = ab_result.boost * ab_result.rotation
 <span class="del">-    cfg.crossing_angle_hor = 25e-3;</span>
 <span class="add">+    cfg.crossing_angle_hor = -25e-3;</span></code></pre>
 
-<h3>Before and after, for users of abconv output</h3>
+<h3>Output of v0.2.1, PR #38 and PR #42</h3>
 <div class="table-wrap"><table>
   <tr><th>quantity</th><th>v0.2.1</th><th>PR #38</th><th>PR #42</th></tr>
   <tr><td>beam directions, divergences, crab kicks</td><td>ePIC</td><td>unchanged</td><td>unchanged</td></tr>
   <tr><td>decay vertices against parent momentum</td><td>25 mrad off</td><td>aligned</td><td>aligned</td></tr>
   <tr><td>IP x against z + ct</td><td>+12.7 mrad</td><td>+12.7 mrad</td><td>−12.3 mrad (ePIC: −12.5)</td></tr>
   <tr><td>beam energy shift, proton / electron</td><td>+2.34e-4 / −0.78e-4</td><td>unchanged</td><td>+0.78e-4 / +0.78e-4</td></tr>
-  <tr><td>IP6 presets, hor / ver</td><td>+25e-3 / +100e-6</td><td>unchanged</td><td>−25e-3 / +100e-6</td></tr>
+  <tr><td>presets hor / ver, IP6 (IP8)</td><td>+25e-3 / +100e-6 (−35e-3 / 0)</td><td>unchanged</td><td>−25e-3 / +100e-6 (+35e-3 / 0)</td></tr>
   <tr><td>meaning of the presets</td><td>opposite to the output</td><td>unchanged</td><td>the hadron beam's angles</td></tr>
 </table></div>
-<p>Two things to know when PR #42 is merged: the output changes for a given random seed, and code that sets
+<p>When PR #42 is merged, the output changes for a given random seed, and code that sets
 <code>crossing_angle_hor</code> itself must change the sign.</p>
 <p>How large is the IP error? 12.5 mrad × 7 mm ≈ 0.09 mm at 1σ of the electron bunch, against a luminous width of
 0.1 mm. Nothing in the kinematics depends on it. It matters for anything that uses the shape of the luminous region
 or the link between IP x and time, such as a collision time taken from the vertex.</p>
 
-<h2>11. The benchmark's balance check failed on a correct transform, and now compares event by event</h2>
+<h2>11. Four-momentum balance check in closure.py</h2>
 <p>Energy and momentum are conserved: in every event the four numbers (p<sub>x</sub>, p<sub>y</sub>, p<sub>z</sub>, E)
 of all outgoing particles, added up, must equal those of the two beams. The difference is the <b>imbalance</b>. The
 benchmark script <code>closure.py</code> checks that abconv does not make it worse. With PR #42 this check failed in
 7 setup-runs, although the transform was right.</p>
-<h3>The cause: Pythia8 itself writes a few events that miss balance</h3>
+<h3>Cause of the 7 failures</h3>
 <ul>
   <li>In setup s2, 10x100_hiacc, it is event 9476. Its imbalance from Pythia8 is (0, 0, −1.34e-5, +1.34e-5)·√s.</li>
   <li>A Lorentz transform changes the components of any four-vector that is not zero. abconv scales this one by
     exactly 1 + θ²/8, the same factor as the beam energies in section 7.</li>
   <li>The growth is 1.34e-5 × 7.8e-5 ≈ 1.0e-9 of √s, right at the old absolute allowance of 1e-9.</li>
 </ul>
-<h3>The fix in <code>closure.py</code></h3>
+<h3>New rule</h3>
 <ul>
   <li>The four-momentum balance is now compared event by event.</li>
   <li>In each event the output's imbalance may exceed the input's by 10 % of it, plus the old absolute 1e-9
@@ -625,9 +626,9 @@ benchmark script <code>closure.py</code> checks that abconv does not make it wor
   <li>Frame: E.C. Aschenauer, D. Holmes, K. Hamdi, <i>Coordinate systems used in EIC</i> (2022),
     <a href="https://doi.org/10.5281/zenodo.14267257">doi:10.5281/zenodo.14267257</a>, sec. 2; the EIC beam-effects
     note, sec. 3.1.1; ePIC <code>compact/definitions.xml</code> (<code>CrossingAngle = -0.025*rad</code>).</li>
-  <li>Code of v0.2.1: <code>cpp/abconv/Converter.cc</code> (boost line 84, rotation loop 96–104);
-    <code>cpp/afterburner/Afterburner.cc</code> (vertex 54–113, beam directions 277, boost 323–328, rotation
-    379–382).</li>
+  <li>Code of v0.2.1: <code>cpp/abconv/Converter.cc</code> (boost line 84, rotation loop 96-104);
+    <code>cpp/afterburner/Afterburner.cc</code> (vertex 54-113, beam directions 277, boost 323-328, rotation
+    379-382).</li>
   <li>Direct test: <code>beam-validation/abconv-signtest.patch</code>, <code>beam-validation/signtest.py</code>;
     decay vertices: <code>beam-validation/vertices.py</code>, <code>space/reports/beam-validation-2026-11-07.md</code>.</li>
   <li>Data: <code>/data/dis-autoresearch/beam-validation/</code>. Page numbers of section 9:

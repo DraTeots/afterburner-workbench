@@ -7,6 +7,7 @@
 # Snakemake does not track the abconv binary: after a rebuild, use a new label or pass --forcerun afterburner_abconv.
 # Example, the full matrix: scripts/run-benchmark.sh main-full $DATA/build/main/abconv/abconv \
 #   --config AFTERBURNER_SETUPS=all AFTERBURNER_N_EVENTS=20000
+# Environment: BENCH_TARGET (below); EICSIM_BIN, the bin directory of a built eicSimuBeamEffects.
 set -euo pipefail
 LABEL=${1:?usage: run-benchmark.sh <label> <abconv|container> [snakemake args]}
 ABCONV=${2:?usage: run-benchmark.sh <label> <abconv|container> [snakemake args]}
@@ -30,7 +31,16 @@ else
   PATHSET="export PATH=$(dirname "$ABCONV"):\$PATH;"
   echo "abconv $ABCONV" >> "$W/source.txt"
 fi
+# EICSIM_BIN: a directory with a built runBeamShapeHepMC (scripts/build-eicsim.sh); it goes first in PATH, ahead of the image's
+if [ -n "${EICSIM_BIN:-}" ]; then
+  [ -x "$EICSIM_BIN/runBeamShapeHepMC" ] || { echo "no runBeamShapeHepMC in $EICSIM_BIN" >&2; exit 2; }
+  PATHSET="$PATHSET export PATH=$EICSIM_BIN:\$PATH;"
+  echo "runBeamShapeHepMC $EICSIM_BIN/runBeamShapeHepMC" >> "$W/source.txt"
+fi
 ARGS=""
 [ $# -gt 0 ] && ARGS=$(printf ' %q' "$@")   # printf with no arguments would emit one empty target
-"$REPO/scripts/in-eic-xl.sh" "$PATHSET cd $W && echo abconv: \$(command -v abconv) && snakemake --cores \$(( \$(nproc) - 2 )) afterburner$ARGS"
+# BENCH_TARGET replaces the default target "afterburner" (all selected setups and the summary), e.g. the report of
+# one setup: BENCH_TARGET=results/afterburner/10x100_hidiv/report.md
+TARGET=${BENCH_TARGET:-afterburner}
+"$REPO/scripts/in-eic-xl.sh" "$PATHSET cd $W && echo abconv: \$(command -v abconv) && snakemake --cores \$(( \$(nproc) - 2 )) $TARGET$ARGS"
 echo "results: $W/results/afterburner/summary.md"
