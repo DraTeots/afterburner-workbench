@@ -213,13 +213,21 @@ the IP is again opposite to the beams. Only the root fix puts every quantity on 
 <span class="del">-        const double rotation_angle_to_z = acos(cos_rotation_angle_to_z);   // TODO back to -acos?</span>
 <span class="add">+        const double rotation_angle_to_z = -acos(cos_rotation_angle_to_z);</span>
 
-// cpp/afterburner/EicConfigurator.cc (all 40 presets) and the defaults in AfterburnerConfig.hh
+// cpp/afterburner/Afterburner.cc:277 — the vertical value is the beam's angle, as the horizontal one
+<span class="del">-    ... .rotateY(_cfg.crossing_angle_hor).rotateX(_cfg.crossing_angle_ver);</span>
+<span class="add">+    ... .rotateY(_cfg.crossing_angle_hor).rotateX(-_cfg.crossing_angle_ver);</span>
+
+// cpp/afterburner/EicConfigurator.cc (40 IP6 presets) and the default in AfterburnerConfig.hh
 <span class="del">-    cfg.crossing_angle_hor = 25e-3;</span>
-<span class="del">-    cfg.crossing_angle_ver = 100e-6;</span>
 <span class="add">+    cfg.crossing_angle_hor = -25e-3;</span>
-<span class="add">+    cfg.crossing_angle_ver = -100e-6;</span></code></pre>
-<p>The vertical preset changes sign too: with +100e-6 the proton would leave at −0.10 mrad. After the fix the
-preset, the beams, the crab kicks and the IP all use the ePIC angles:</p>
+// the 14 IP8 presets
+<span class="del">-    cfg.crossing_angle_hor = -35e-3;</span>
+<span class="add">+    cfg.crossing_angle_hor = 35e-3;</span></code></pre>
+<p>The vertical preset stays at +100e-6. <code>rotateX(+θ)</code> tilts +z toward −y, so the fix applies
+<code>rotateX(−θ<sub>v</sub>)</code>, and θ<sub>v</sub> becomes the beam's vertical angle, positive toward +y, as θ<sub>h</sub>
+is the beam's horizontal angle. That is how the EIC beam-effects note gives it (a 100 µrad tilt that puts the hadron
+beam to higher y) and how eicBeamShape sets it (<code>mXAngleY = +0.0001</code>). After the fix the preset, the beams,
+the crab kicks and the IP all use the ePIC angles:</p>
 \[
 \hat d_p = (-25.0,\; +0.10)\ \text{mrad},\qquad
 x_{\rm IP} = \frac{\theta}{2}(z + ct) + \xi_x = -12.5\ \text{mrad}\times(z + ct) + \xi_x .
@@ -232,7 +240,7 @@ x_{\rm IP} = \frac{\theta}{2}(z + ct) + \xi_x = -12.5\ \text{mrad}\times(z + ct)
   <tr><td>IP crossing term, x against z + ct</td><td>+12.5 mrad</td><td>−12.5 mrad (ePIC)</td></tr>
   <tr><td>beam energy shift, proton / electron</td><td>+2.34e-4 / −0.78e-4</td><td>−0.78e-4 / +2.34e-4</td></tr>
   <tr><td>displaced vertices (with PR #38)</td><td>aligned</td><td>aligned</td></tr>
-  <tr><td>preset values</td><td>+25e-3 / +100e-6</td><td>−25e-3 / −100e-6</td></tr>
+  <tr><td>preset values, IP6 (IP8)</td><td>+25e-3 / +100e-6 (−35e-3 / 0)</td><td>−25e-3 / +100e-6 (+35e-3 / 0)</td></tr>
 </table></div>
 <p>The crossing term in IP x is small: 12.5 mrad × 7 mm ≈ 0.09 mm at 1σ of the electron bunch, against a 0.1 mm
 luminous width. It matters for anything that uses the luminous-region shape or the x–t correlation of the IP, such

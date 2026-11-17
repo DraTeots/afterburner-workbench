@@ -1,0 +1,31 @@
+// Opens the workbench inside eic_xl (Dockerfile). The scripts that call docker (scripts/in-eic-xl.sh and the
+// scripts built on it) run on the host, not in here; in here, run abconv, cmake and python directly.
+{
+  "name": "afterburner-workbench (eic_xl)",
+  "build": { "dockerfile": "Dockerfile" },
+  "remoteUser": "eic",
+  "updateRemoteUserUID": true,
+  // The image's environment (spack view, ROOT, DD4hep, the ePIC geometry) is set by /etc/profile;
+  // VS Code reads it from a login shell for terminals and extensions.
+  "userEnvProbe": "loginInteractiveShell",
+  // The workbench and the data area at their host paths, as scripts/in-eic-xl.sh binds them, so paths in
+  // logs, notes and build trees mean the same inside and outside.
+  "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+  "workspaceFolder": "${localWorkspaceFolder}",
+  "initializeCommand": "mkdir -p /data/afterburner-workbench",
+  "mounts": [ "source=/data/afterburner-workbench,target=/data/afterburner-workbench,type=bind" ],
+  "containerEnv": { "WORKBENCH_DATA": "/data/afterburner-workbench" },
+  "customizations": {
+    "vscode": {
+      "extensions": [ "ms-vscode.cpptools", "ms-vscode.cmake-tools", "ms-python.python" ],
+      // These override your user settings, which also apply in here and point CMake Tools at miniforge.
+      // The image's cmake is not on the image's default PATH (/etc/profile adds /opt/local/bin).
+      "settings": {
+        "cmake.cmakePath": "/opt/local/bin/cmake",
+        "cmake.additionalCompilerSearchDirs": [],
+        "cmake.sourceDirectory": "${workspaceFolder}/afterburner/cpp",
+        "cmake.buildDirectory": "/data/afterburner-workbench/build/vscode"
+      }
+    }
+  }
+}
